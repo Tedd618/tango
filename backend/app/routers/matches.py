@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Match, Swipe, SwipeAction, User, UserRole
-from app.schemas import MatchResponse, SwipeCreate, SwipeResponse, UserResponse
+from app.models import Match, Message, Swipe, SwipeAction, User, UserRole
+from app.schemas import MatchResponse, MessageCreate, MessageResponse, SwipeCreate, SwipeResponse, UserWithDetails
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
@@ -87,7 +87,7 @@ def get_matches(user_id: int, db: Session = Depends(get_db)):
     )
 
 
-@router.get("/{user_id}/candidates", response_model=list[UserResponse])
+@router.get("/{user_id}/candidates", response_model=list[UserWithDetails])
 def get_candidates(user_id: int, db: Session = Depends(get_db)):
     """Return users of the opposite role that this user hasn't swiped on yet."""
     user = db.query(User).filter(User.id == user_id).first()
@@ -105,3 +105,50 @@ def get_candidates(user_id: int, db: Session = Depends(get_db)):
         .limit(20)
         .all()
     )
+
+
+@router.get("/match/{match_id}", response_model=MatchResponse)
+def get_match(match_id: int, db: Session = Depends(get_db)):
+    match = db.query(Match).filter(Match.id == match_id).first()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+    return match
+
+
+@router.delete("/match/{match_id}", status_code=204)
+def delete_match(match_id: int, db: Session = Depends(get_db)):
+    match = db.query(Match).filter(Match.id == match_id).first()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+    db.delete(match)
+    db.commit()
+
+
+# ---------------------------------------------------------------------------
+# Messages
+# ---------------------------------------------------------------------------
+
+@router.get("/match/{match_id}/messages", response_model=list[MessageResponse])
+def list_messages(match_id: int, db: Session = Depends(get_db)):
+    if not db.query(Match).filter(Match.id == match_id).first():
+        raise HTTPException(status_code=404, detail="Match not found")
+    return (
+        db.query(Message)
+        .filter(Message.match_id == match_id)
+        .order_by(Message.created_at)
+        .all()
+    )
+
+
+@router.post("/match/{match_id}/messages", response_model=MessageResponse, status_code=201)
+def send_message(match_id: int, body: MessageCreate, db: Session = Depends(get_db)):
+    match = db.query(Match).filter(Match.id == match_id).first()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+    if body.sender_id not in (match.recruiter_id, match.applicant_id):
+        raise HTTPException(status_code=403, detail="Not a participant in this match")
+    db_msg = Message(match_id=match_id, sender_id=body.sender_id, content=body.content)
+    db.add(db_msg)
+    db.commit()
+    db.refresh(db_msg)
+    return db_msg

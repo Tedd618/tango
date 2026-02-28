@@ -7,6 +7,12 @@ from pydantic import BaseModel, EmailStr
 # Prompt templates (preset by devs)
 # ---------------------------------------------------------------------------
 
+class PromptTemplateCreate(BaseModel):
+    type: str  # "poll" or "question"
+    text: str
+    options: str | None = None  # JSON string for polls, null for questions
+
+
 class PromptTemplateResponse(BaseModel):
     id: int
     type: str
@@ -77,6 +83,19 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     pass
+
+
+class UserUpdate(BaseModel):
+    name: str | None = None
+    gender: str | None = None
+    location: str | None = None
+    nationality: str | None = None
+    industry: str | None = None
+    salary_min: int | None = None
+    salary_max: int | None = None
+    previous_occupation: str | None = None
+    education: str | None = None
+    resume_url: str | None = None
 
 
 class UserResponse(UserBase):
@@ -150,6 +169,7 @@ class MatchResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 class MessageCreate(BaseModel):
+    sender_id: int
     content: str
 
 
