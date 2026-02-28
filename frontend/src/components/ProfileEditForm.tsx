@@ -6,6 +6,7 @@ import {
     uploadUserPhoto,
     addUserPrompt,
     deleteUserPrompt,
+    clearSwipeHistory,
     UserProfile,
     PromptTemplate,
     UserPrompt,
@@ -284,6 +285,24 @@ export default function ProfileEditForm({ user, templates }: ProfileEditFormProp
                 )
             }
 
+            {/* Danger Zone */}
+            <section className="flex flex-col gap-3 border-t border-red-100 pt-8 mt-2 mx-0">
+                <h2 className="text-xs font-black uppercase text-red-400 tracking-widest">Danger Zone</h2>
+                <button
+                    onClick={async () => {
+                        if (!confirm("Reset your like/pass history? You'll rediscover profiles you've already swiped on.")) return;
+                        try {
+                            await clearSwipeHistory(user.id);
+                            alert("History cleared! Refresh the Discover page.");
+                        } catch {
+                            alert("Failed to reset history.");
+                        }
+                    }}
+                    className="w-full py-3 rounded-2xl border-2 border-red-200 text-red-500 text-xs font-black uppercase tracking-widest hover:bg-red-50 transition-colors"
+                >
+                    Reset Like / Pass History
+                </button>
+            </section>
         </div >
     );
 }

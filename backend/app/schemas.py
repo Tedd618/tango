@@ -152,6 +152,7 @@ class SwipeResponse(BaseModel):
     target_id: int
     action: str
     is_match: bool = False
+    match_id: int | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

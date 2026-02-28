@@ -47,6 +47,7 @@ def swipe(user_id: int, swipe_data: SwipeCreate, db: Session = Depends(get_db)):
 
     # Check for a mutual like → create a match
     is_match = False
+    match_id = None
     if swipe_data.action == SwipeAction.LIKE.value:
         reverse = (
             db.query(Swipe)
@@ -63,7 +64,9 @@ def swipe(user_id: int, swipe_data: SwipeCreate, db: Session = Depends(get_db)):
             match = Match(applicant_id=applicant_id, recruiter_id=recruiter_id)
             db.add(match)
             db.commit()
+            db.refresh(match)
             is_match = True
+            match_id = match.id
 
     return SwipeResponse(
         id=db_swipe.id,
@@ -72,6 +75,7 @@ def swipe(user_id: int, swipe_data: SwipeCreate, db: Session = Depends(get_db)):
         action=db_swipe.action.value if hasattr(db_swipe.action, "value") else db_swipe.action,
         created_at=db_swipe.created_at,
         is_match=is_match,
+        match_id=match_id,
     )
 
 
@@ -137,6 +141,15 @@ def get_inbox(user_id: int, db: Session = Depends(get_db)):
         .limit(50)
         .all()
     )
+
+
+@router.delete("/{user_id}/history", status_code=204)
+def clear_swipe_history(user_id: int, db: Session = Depends(get_db)):
+    """Delete all swipes initiated by this user so they can rediscover profiles."""
+    if not db.query(User).filter(User.id == user_id).first():
+        raise HTTPException(status_code=404, detail="User not found")
+    db.query(Swipe).filter(Swipe.swiper_id == user_id).delete()
+    db.commit()
 
 
 @router.get("/match/{match_id}", response_model=MatchResponse)

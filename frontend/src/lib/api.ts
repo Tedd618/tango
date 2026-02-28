@@ -59,6 +59,15 @@ export async function fetchCurrentUser(email: string): Promise<UserProfile | nul
     return detailRes.json();
 }
 
+export async function fetchUserById(userId: number): Promise<UserProfile | null> {
+    const res = await fetch(`${API_BASE}/users/${userId}`);
+    if (!res.ok) {
+        if (res.status === 404) return null;
+        throw new Error("Failed to fetch user by ID");
+    }
+    return res.json();
+}
+
 export async function updateUser(userId: number, data: Partial<UserProfile>): Promise<UserProfile> {
     const res = await fetch(`${API_BASE}/users/${userId}`, {
         method: "PATCH",
@@ -150,6 +159,7 @@ export interface SwipeResult {
     target_id: number;
     action: string;
     is_match: boolean;
+    match_id?: number;
     created_at: string;
 }
 
@@ -176,5 +186,57 @@ export async function swipeUser(
         body: JSON.stringify({ target_id: targetId, action }),
     });
     if (!res.ok) throw new Error("Failed to swipe");
+    return res.json();
+}
+
+export async function clearSwipeHistory(userId: number): Promise<void> {
+    const res = await fetch(`${API_BASE}/matches/${userId}/history`, {
+        method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Failed to clear swipe history");
+}
+
+// ---------------------------------------------------------------------------
+// Matches & Messages
+// ---------------------------------------------------------------------------
+
+export interface Match {
+    id: number;
+    recruiter_id: number;
+    applicant_id: number;
+    created_at: string;
+}
+
+export interface Message {
+    id: number;
+    match_id: number;
+    sender_id: number;
+    content: string;
+    created_at: string;
+}
+
+export async function fetchMatches(userId: number): Promise<Match[]> {
+    const res = await fetch(`${API_BASE}/matches/${userId}/matches`);
+    if (!res.ok) throw new Error("Failed to fetch matches");
+    return res.json();
+}
+
+export async function fetchMessages(matchId: number): Promise<Message[]> {
+    const res = await fetch(`${API_BASE}/matches/match/${matchId}/messages`);
+    if (!res.ok) throw new Error("Failed to fetch messages");
+    return res.json();
+}
+
+export async function sendMessage(
+    matchId: number,
+    senderId: number,
+    content: string
+): Promise<Message> {
+    const res = await fetch(`${API_BASE}/matches/match/${matchId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sender_id: senderId, content }),
+    });
+    if (!res.ok) throw new Error("Failed to send message");
     return res.json();
 }
