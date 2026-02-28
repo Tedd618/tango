@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { UserProfile, Match, markMessagesAsRead } from "@/lib/api";
+import { useState, useEffect } from "react";
+import { UserProfile, Match, markMessagesAsRead, fetchMatches, fetchUserById } from "@/lib/api";
 import ChatWindow from "./ChatWindow";
 
 interface MatchedConversation {
@@ -25,6 +25,35 @@ export default function MatchesClient({
 
     const selectedConvo = conversations.find(c => c.match.id === selectedMatchId);
 
+    // Polling for new matches / unread counts
+    useEffect(() => {
+        const poll = async () => {
+            try {
+                const matches = await fetchMatches(currentUser.id);
+
+                // For each match, if not in current local state, fetch user info too
+                const updatedConvos = await Promise.all(
+                    matches.map(async (m) => {
+                        const existing = conversations.find(c => c.match.id === m.id);
+                        if (existing) {
+                            return { ...existing, match: m };
+                        }
+                        // New match found during polling
+                        const otherUserId = currentUser.role === "applicant" ? m.recruiter_id : m.applicant_id;
+                        const otherUser = await fetchUserById(otherUserId);
+                        return { match: m, otherUser: otherUser! };
+                    })
+                );
+                setConversations(updatedConvos);
+            } catch (e) {
+                console.error("Polling matches failed", e);
+            }
+        };
+
+        const interval = setInterval(poll, 5000);
+        return () => clearInterval(interval);
+    }, [currentUser.id, currentUser.role, conversations]); // Re-subscribe if user changes
+
     const handleSelectMatch = (matchId: number) => {
         setSelectedMatchId(matchId);
         // Promptly clear unread count in local state for immediate feedback
@@ -36,7 +65,7 @@ export default function MatchesClient({
     };
 
     return (
-        <div className="flex h-full overflow-hidden pb-[70px] md:pb-0">
+        <div className="flex h-full overflow-hidden">
             {/* Sidebar - hidden on mobile if a chat is selected */}
             <aside className={`w-full md:w-[400px] flex flex-col border-r border-neutral-200 bg-white z-10 shrink-0 ${selectedMatchId ? "hidden md:flex" : "flex"}`}>
                 <div className="px-6 pt-6 pb-2">
@@ -45,8 +74,8 @@ export default function MatchesClient({
 
                 <div className="h-px bg-neutral-100 w-full mb-2" />
 
-                {/* Conversations list */}
-                <div className="flex-1 overflow-y-auto px-2">
+                {/* Conversations list - pad the bottom for nav bar */}
+                <div className="flex-1 overflow-y-auto px-2 pb-[90px] md:pb-6">
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 py-3 flex justify-between items-center">
                         <span>{conversations.length > 0 ? "Messages" : "No matches yet"}</span>
                     </div>
@@ -120,9 +149,9 @@ export default function MatchesClient({
             {/* Chat window space - hidden on mobile if no chat selected */}
             <main className={`flex-1 flex flex-col bg-white ${!selectedMatchId ? "hidden md:flex" : "flex"}`}>
                 {selectedConvo ? (
-                    <div className="flex flex-col h-full">
+                    <div className="flex flex-col h-full bg-white">
                         {/* Mobile Back Button */}
-                        <div className="md:hidden px-4 pt-4 shrink-0">
+                        <div className="md:hidden px-4 pt-4 shrink-0 bg-white">
                             <button
                                 onClick={() => setSelectedMatchId(undefined)}
                                 className="flex items-center gap-1 text-primary font-black text-sm"
@@ -131,11 +160,14 @@ export default function MatchesClient({
                                 Back to Matches
                             </button>
                         </div>
-                        <ChatWindow
-                            matchId={selectedConvo.match.id}
-                            currentUser={currentUser}
-                            otherUser={selectedConvo.otherUser}
-                        />
+                        {/* Chat content needs its own bottom padding for nav bar */}
+                        <div className="flex-1 min-h-0 pb-[85px] md:pb-0">
+                            <ChatWindow
+                                matchId={selectedConvo.match.id}
+                                currentUser={currentUser}
+                                otherUser={selectedConvo.otherUser}
+                            />
+                        </div>
                     </div>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gray-50/50">

@@ -110,8 +110,8 @@ export default function ChatWindow({ matchId, currentUser, otherUser }: ChatWind
                 <div ref={bottomRef} className="h-4 shrink-0" />
             </div>
 
-            {/* Input bar */}
-            <div className="shrink-0 px-4 py-3 bg-white border-t border-gray-100 flex items-center gap-3">
+            {/* Input bar - No additional padding here; layout handled by parent overflow and pb */}
+            <div className="shrink-0 px-4 py-3 bg-white border-t border-gray-100 flex items-center gap-3 safe-bottom">
                 <input
                     type="text"
                     value={input}
