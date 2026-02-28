@@ -1,4 +1,6 @@
 import Header from "@/components/Header";
+import { auth0 } from "@/lib/auth0";
+import { redirect } from "next/navigation";
 
 const SARAH_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBxdvkO-iwyy-_iY-aBxDdW-N89xx3cmFXjGoL8t0ecKGjjsfm-R7wnSYk2We8gDDJhFRsiFFwk66atkx6BDqm4038Gfxzy3rFX_C59SeVKWqctd6jf3UbSIO1oVxJdb6s0QjJPpg5171MoSc10FxjiN7-THcVv-4yJCRNL3Gep0kjbuiXNFYsY0vLXNsT7GMeF7-UlDwurob-1hRyzpjs3HfXGe_i5pl3lF24uvtLXJrtLJuBiIstkoAPL2v9LGN_jxyw82RClkDuq";
@@ -45,7 +47,12 @@ const conversations = [
   },
 ];
 
-export default function MatchesPage() {
+export default async function MatchesPage() {
+  const session = await auth0.getSession();
+  if (!session) {
+    redirect("/auth/login?returnTo=/matches");
+  }
+
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-background-light text-text-primary-light">
       <Header />
@@ -116,17 +123,15 @@ export default function MatchesPage() {
             {conversations.map((convo) => (
               <div
                 key={convo.id}
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-colors border-l-4 ${
-                  convo.active
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-colors border-l-4 ${convo.active
                     ? "bg-primary/10 border-primary"
                     : "hover:bg-background-light border-transparent"
-                }`}
+                  }`}
               >
                 <div className="relative shrink-0">
                   <div
-                    className={`bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 ${
-                      !convo.active ? "grayscale-[0.2]" : ""
-                    }`}
+                    className={`bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 ${!convo.active ? "grayscale-[0.2]" : ""
+                      }`}
                     style={{ backgroundImage: `url("${convo.avatar}")` }}
                     aria-label={convo.name}
                   />
@@ -137,9 +142,8 @@ export default function MatchesPage() {
                 <div className="flex flex-col justify-center flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
                     <p
-                      className={`text-text-primary-light text-base leading-normal truncate ${
-                        convo.active ? "font-bold" : "font-semibold"
-                      }`}
+                      className={`text-text-primary-light text-base leading-normal truncate ${convo.active ? "font-bold" : "font-semibold"
+                        }`}
                     >
                       {convo.name}
                     </p>
@@ -148,11 +152,10 @@ export default function MatchesPage() {
                     </p>
                   </div>
                   <p
-                    className={`text-sm leading-normal line-clamp-1 truncate ${
-                      convo.active
+                    className={`text-sm leading-normal line-clamp-1 truncate ${convo.active
                         ? "text-text-primary-light font-medium"
                         : "text-text-secondary-light font-normal"
-                    }`}
+                      }`}
                   >
                     {convo.message}
                   </p>

@@ -1,4 +1,6 @@
 import Header from "@/components/Header";
+import { auth0 } from "@/lib/auth0";
+import { redirect } from "next/navigation";
 
 const SARAH_PORTRAIT =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDX6O6_0yNg4g8NbfEwiqVvVzS03VQ7QgM8vP5dNkF-ZSwbFs3AvATHUCZWMm5IkPjBDMvgTo1fDi7AQDmll8M6SyAC8_k6RqCf5n6Pumlq0FQdSemWMuBrZceYiSa1gmD4UEpmkfD_2msf1fdZoQ8qpuc2gMlMxtHc4A2a15hxigtPObCSWO9NWzyt2R9Th6Je47mv37BwuiHpS3tzzn2u1pUYf2dDoM3fI-Tll37dMO4B5QGMNNR6a0xyznzuJz60oEeED5Ry9Wgg";
@@ -6,7 +8,12 @@ const SARAH_PORTRAIT =
 const TEAM_PHOTO =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAj1Ag-h3UChiUHLYK0flg9mr9HE_81sCc86laU6UyHP5rZzXL8NECMTImyRST1hkDskPajgJo9MPi9Raju--kjjlCVaN_NbFh_ZcnwZS3eJNbPNlzDCAffwI0ki8-2Hrsez8eBiswrD_Li5wK4ggG97WnVovfpEUHKBNCZOvSUtxE7sdUNVvjXMqScDNAynv3UBGqKCXnqXoGlLOnAhsk7GjfqQ8f-Nh5CQqsNkIE0GxEweqqNMjJW8cCPwcV1XyXr_fgwbHv15ag7";
 
-export default function DiscoverPage() {
+export default async function DiscoverPage() {
+  const session = await auth0.getSession();
+  if (!session) {
+    redirect("/auth/login?returnTo=/discover");
+  }
+
   return (
     <div className="bg-background-light min-h-screen flex flex-col text-text-primary-light">
       <Header />

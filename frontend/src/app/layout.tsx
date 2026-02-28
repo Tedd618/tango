@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Auth0Provider } from "@auth0/nextjs-auth0/client";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -28,7 +29,9 @@ export default function RootLayout({
         />
       </head>
       <body className={`${plusJakartaSans.variable} font-display antialiased`}>
-        {children}
+        <Auth0Provider>
+          {children}
+        </Auth0Provider>
       </body>
     </html>
   );

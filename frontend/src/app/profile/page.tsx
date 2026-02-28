@@ -1,4 +1,6 @@
 import Header from "@/components/Header";
+import { auth0 } from "@/lib/auth0";
+import { redirect } from "next/navigation";
 
 const SARAH_HEADSHOT =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuB5zCOXn6D7rBtTI-9UW2xmEmVChGCxX4aWTyUa5cRQVQ7D5M0j67798Y_ci27iL16IjJwrYU3GNcC6_XLPowz_IcVd76t1p33UNEMnsqOjvcy7zFG9_QlYRIrqyD4_nIwRcoR-zZF8U4Gw4JpNi-35YwrRdjVETnhK_AIUb-x0jDRa21ajMr7xWNrFofWWiksWYGP7WWReA0kw9r2Pl4yMxvRqBYGwWWi9XkC16D9RylxRbICt82UjLGlMcARyAZUb6MmInwtsgZrS";
@@ -22,7 +24,12 @@ const roleDetails = [
   { icon: "laptop_mac", label: "Work Policy", value: "Remote First" },
 ];
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const session = await auth0.getSession();
+  if (!session) {
+    redirect("/auth/login?returnTo=/profile");
+  }
+
   return (
     <div className="bg-background-light min-h-screen text-text-primary-light">
       <Header />
