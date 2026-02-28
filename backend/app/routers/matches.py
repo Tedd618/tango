@@ -100,7 +100,7 @@ def get_candidates(user_id: int, db: Session = Depends(get_db)):
 
     candidates = (
         db.query(User)
-        .filter(User.role == target_role, User.id.notin_(swiped_ids))
+        .filter(User.role == target_role, User.id != user_id, User.id.notin_(swiped_ids))
         .limit(20)
         .all()
     )
