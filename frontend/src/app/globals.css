@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  scrollbar-gutter: stable;
+}
+
 @theme {
   /* Brand colors */
   --color-primary: #8ace00;
