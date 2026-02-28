@@ -9,8 +9,11 @@ router = APIRouter(prefix="/prompts", tags=["prompts"])
 
 
 @router.get("/templates", response_model=list[PromptTemplateResponse])
-def list_templates(db: Session = Depends(get_db)):
-    return db.query(PromptTemplate).all()
+def list_templates(role: str = None, db: Session = Depends(get_db)):
+    query = db.query(PromptTemplate)
+    if role:
+        query = query.filter(PromptTemplate.target_role == role)
+    return query.all()
 
 
 @router.post("/templates", response_model=PromptTemplateResponse, status_code=201)

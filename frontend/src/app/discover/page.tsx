@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import { auth0 } from "@/lib/auth0";
 import { redirect } from "next/navigation";
+import { fetchCurrentUser } from "@/lib/api";
 
 const SARAH_PORTRAIT =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDX6O6_0yNg4g8NbfEwiqVvVzS03VQ7QgM8vP5dNkF-ZSwbFs3AvATHUCZWMm5IkPjBDMvgTo1fDi7AQDmll8M6SyAC8_k6RqCf5n6Pumlq0FQdSemWMuBrZceYiSa1gmD4UEpmkfD_2msf1fdZoQ8qpuc2gMlMxtHc4A2a15hxigtPObCSWO9NWzyt2R9Th6Je47mv37BwuiHpS3tzzn2u1pUYf2dDoM3fI-Tll37dMO4B5QGMNNR6a0xyznzuJz60oEeED5Ry9Wgg";
@@ -12,6 +13,11 @@ export default async function DiscoverPage() {
   const session = await auth0.getSession();
   if (!session) {
     redirect("/auth/login?returnTo=/discover");
+  }
+
+  const user = await fetchCurrentUser(session.user.email!);
+  if (!user) {
+    redirect("/onboarding");
   }
 
   return (

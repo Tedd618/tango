@@ -6,37 +6,45 @@ Run from the backend/ directory:
 from app.database import SessionLocal
 from app.models import PromptTemplate, PromptType
 
-TEMPLATES = [
+APPLICANT_TEMPLATES = [
     # --- Questions ---
-    {"type": PromptType.QUESTION, "text": "I'm best at...", "options": None},
-    {"type": PromptType.QUESTION, "text": "My dream project is...", "options": None},
-    {"type": PromptType.QUESTION, "text": "The work environment I thrive in...", "options": None},
-    {"type": PromptType.QUESTION, "text": "Something I'm proud of building...", "options": None},
-    {"type": PromptType.QUESTION, "text": "I'm looking for a role where...", "options": None},
-    {"type": PromptType.QUESTION, "text": "Outside of work you'll find me...", "options": None},
-    {"type": PromptType.QUESTION, "text": "My superpower is...", "options": None},
-    {"type": PromptType.QUESTION, "text": "I learn best by...", "options": None},
+    {"type": PromptType.QUESTION, "text": "I'm best at...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "My dream project is...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "The work environment I thrive in...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "Something I'm proud of building...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "I'm looking for a role where...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "Outside of work you'll find me...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "My superpower is...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "I learn best by...", "target_role": "applicant"},
+]
 
-    # --- Polls ---
-    {"type": PromptType.POLL, "text": "What matters most in a team?", "options": None},
-    {"type": PromptType.POLL, "text": "My ideal work setup is...", "options": None},
-    {"type": PromptType.POLL, "text": "I work best...", "options": None},
-    {"type": PromptType.POLL, "text": "When starting a new project I...", "options": None},
+RECRUITER_TEMPLATES = [
+    {"type": PromptType.QUESTION, "text": "The ideal candidate for this role has...", "target_role": "recruiter"},
+    {"type": PromptType.QUESTION, "text": "A typical day in our engineering team involves...", "target_role": "recruiter"},
+    {"type": PromptType.QUESTION, "text": "One project you'll be working on right away is...", "target_role": "recruiter"},
+    {"type": PromptType.QUESTION, "text": "The most important quality we are looking for is...", "target_role": "recruiter"},
+    {"type": PromptType.QUESTION, "text": "Our team culture can best be described as...", "target_role": "recruiter"},
+    {"type": PromptType.QUESTION, "text": "My best piece of advice for the interview process is...", "target_role": "recruiter"},
 ]
 
 
 def seed():
     db = SessionLocal()
     try:
-        existing = db.query(PromptTemplate).count()
-        if existing:
-            print(f"Already have {existing} templates — skipping seed.")
-            return
+        for template in APPLICANT_TEMPLATES + RECRUITER_TEMPLATES:
+            exists = db.query(PromptTemplate).filter_by(
+                text=template["text"],
+                target_role=template["target_role"]
+            ).first()
+            if not exists:
+                db.add(PromptTemplate(
+                    type=template["type"],
+                    text=template["text"],
+                    target_role=template["target_role"],
+                ))
 
-        for t in TEMPLATES:
-            db.add(PromptTemplate(**t))
         db.commit()
-        print(f"Seeded {len(TEMPLATES)} prompt templates.")
+        print(f"Seed complete. Added up to {len(APPLICANT_TEMPLATES)} applicant + {len(RECRUITER_TEMPLATES)} recruiter prompts.")
     finally:
         db.close()
 
