@@ -166,6 +166,7 @@ class MatchResponse(BaseModel):
     id: int
     recruiter_id: int
     applicant_id: int
+    unread_count: int = 0
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -185,6 +186,7 @@ class MessageResponse(BaseModel):
     match_id: int
     sender_id: int
     content: str
+    is_read: bool
     created_at: datetime
 
     model_config = {"from_attributes": True}

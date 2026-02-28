@@ -204,6 +204,7 @@ export interface Match {
     id: number;
     recruiter_id: number;
     applicant_id: number;
+    unread_count: number;
     created_at: string;
 }
 
@@ -212,6 +213,7 @@ export interface Message {
     match_id: number;
     sender_id: number;
     content: string;
+    is_read: boolean;
     created_at: string;
 }
 
@@ -239,4 +241,17 @@ export async function sendMessage(
     });
     if (!res.ok) throw new Error("Failed to send message");
     return res.json();
+}
+
+export async function fetchUnreadTotal(userId: number): Promise<{ count: number }> {
+    const res = await fetch(`${API_BASE}/matches/${userId}/unread-total`);
+    if (!res.ok) throw new Error("Failed to fetch unread total");
+    return res.json();
+}
+
+export async function markMessagesAsRead(matchId: number, userId: number): Promise<void> {
+    const res = await fetch(`${API_BASE}/matches/match/${matchId}/read?user_id=${userId}`, {
+        method: "PATCH",
+    });
+    if (!res.ok) throw new Error("Failed to mark messages as read");
 }

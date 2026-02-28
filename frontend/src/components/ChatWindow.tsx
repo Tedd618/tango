@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Message, UserProfile, fetchMessages, sendMessage } from "@/lib/api";
+import { Message, UserProfile, fetchMessages, sendMessage, markMessagesAsRead } from "@/lib/api";
 
 interface ChatWindowProps {
     matchId: number;
@@ -21,6 +21,12 @@ export default function ChatWindow({ matchId, currentUser, otherUser }: ChatWind
             try {
                 const msgs = await fetchMessages(matchId);
                 setMessages(msgs);
+
+                // If any messages are from the other user and are unread, mark them as read
+                const hasUnread = msgs.some(m => m.sender_id !== currentUser.id && !m.is_read);
+                if (hasUnread) {
+                    await markMessagesAsRead(matchId, currentUser.id);
+                }
             } catch {
                 // silent — polling will retry
             }
@@ -28,7 +34,7 @@ export default function ChatWindow({ matchId, currentUser, otherUser }: ChatWind
         load();
         const interval = setInterval(load, 3000);
         return () => clearInterval(interval);
-    }, [matchId]);
+    }, [matchId, currentUser.id]);
 
     // Auto-scroll to bottom on new messages
     useEffect(() => {
@@ -64,9 +70,9 @@ export default function ChatWindow({ matchId, currentUser, otherUser }: ChatWind
                         <span className="material-symbols-outlined text-gray-400 text-xl">account_circle</span>
                     </div>
                 )}
-                <div>
-                    <p className="font-black text-sm text-[#111]">{otherUser.name}</p>
-                    <p className="text-xs text-gray-400 font-bold">
+                <div className="min-w-0">
+                    <p className="font-black text-sm text-[#111] truncate">{otherUser.name}</p>
+                    <p className="text-xs text-gray-400 font-bold truncate">
                         {otherUser.role === "recruiter"
                             ? [otherUser.job_title, otherUser.company_name].filter(Boolean).join(" · ")
                             : otherUser.previous_occupation || otherUser.industry || ""}
@@ -91,9 +97,9 @@ export default function ChatWindow({ matchId, currentUser, otherUser }: ChatWind
                     return (
                         <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                             <div
-                                className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm font-bold leading-relaxed shadow-sm ${isMine
-                                        ? "bg-primary text-white rounded-br-sm"
-                                        : "bg-white text-[#111] border border-gray-100 rounded-bl-sm"
+                                className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm font-bold leading-relaxed shadow-sm ${isMine
+                                    ? "bg-primary text-white rounded-br-sm"
+                                    : "bg-white text-[#111] border border-gray-100 rounded-bl-sm"
                                     }`}
                             >
                                 {msg.content}
@@ -101,7 +107,7 @@ export default function ChatWindow({ matchId, currentUser, otherUser }: ChatWind
                         </div>
                     );
                 })}
-                <div ref={bottomRef} />
+                <div ref={bottomRef} className="h-4 shrink-0" />
             </div>
 
             {/* Input bar */}

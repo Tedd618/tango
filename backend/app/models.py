@@ -182,6 +182,7 @@ class Message(Base):
     match_id: Mapped[int] = mapped_column(ForeignKey("matches.id"), nullable=False)
     sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     match: Mapped["Match"] = relationship(back_populates="messages")

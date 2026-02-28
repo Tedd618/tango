@@ -84,11 +84,39 @@ def get_matches(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return (
-        db.query(Match)
-        .filter((Match.applicant_id == user_id) | (Match.recruiter_id == user_id))
-        .all()
-    )
+    
+    matches = db.query(Match).filter((Match.applicant_id == user_id) | (Match.recruiter_id == user_id)).all()
+    
+    # Add unread count for each match
+    for m in matches:
+        unread = db.query(Message).filter(
+            Message.match_id == m.id,
+            Message.sender_id != user_id,
+            Message.is_read == False
+        ).count()
+        m.unread_count = unread
+        
+    return matches
+
+
+@router.get("/{user_id}/unread-total", response_model=dict)
+def get_unread_total(user_id: int, db: Session = Depends(get_db)):
+    count = db.query(Message).join(Match).filter(
+        ((Match.applicant_id == user_id) | (Match.recruiter_id == user_id)),
+        Message.sender_id != user_id,
+        Message.is_read == False
+    ).count()
+    return {"count": count}
+
+
+@router.patch("/match/{match_id}/read", status_code=204)
+def mark_as_read(match_id: int, user_id: int, db: Session = Depends(get_db)):
+    db.query(Message).filter(
+        Message.match_id == match_id,
+        Message.sender_id != user_id,
+        Message.is_read == False
+    ).update({Message.is_read: True}, synchronize_session=False)
+    db.commit()
 
 
 @router.get("/{user_id}/candidates", response_model=list[UserWithDetails])

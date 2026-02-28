@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserProfile, Match } from "@/lib/api";
+import { UserProfile, Match, markMessagesAsRead } from "@/lib/api";
 import ChatWindow from "./ChatWindow";
 
 interface MatchedConversation {
@@ -21,13 +21,24 @@ export default function MatchesClient({
     initialSelectedMatchId
 }: MatchesClientProps) {
     const [selectedMatchId, setSelectedMatchId] = useState<number | undefined>(initialSelectedMatchId);
+    const [conversations, setConversations] = useState<MatchedConversation[]>(initialMatchedConversations);
 
-    const selectedConvo = initialMatchedConversations.find(c => c.match.id === selectedMatchId);
+    const selectedConvo = conversations.find(c => c.match.id === selectedMatchId);
+
+    const handleSelectMatch = (matchId: number) => {
+        setSelectedMatchId(matchId);
+        // Promptly clear unread count in local state for immediate feedback
+        setConversations(prev => prev.map(c =>
+            c.match.id === matchId ? { ...c, match: { ...c.match, unread_count: 0 } } : c
+        ));
+        // Mark as read on backend
+        markMessagesAsRead(matchId, currentUser.id).catch(() => { });
+    };
 
     return (
-        <div className="flex h-full overflow-hidden">
-            {/* Sidebar */}
-            <aside className="w-full md:w-[400px] flex flex-col border-r border-neutral-200 bg-white z-10 shrink-0">
+        <div className="flex h-full overflow-hidden pb-[70px] md:pb-0">
+            {/* Sidebar - hidden on mobile if a chat is selected */}
+            <aside className={`w-full md:w-[400px] flex flex-col border-r border-neutral-200 bg-white z-10 shrink-0 ${selectedMatchId ? "hidden md:flex" : "flex"}`}>
                 <div className="px-6 pt-6 pb-2">
                     <h3 className="tracking-tight text-3xl font-bold leading-tight mb-4">Matches</h3>
                 </div>
@@ -36,18 +47,19 @@ export default function MatchesClient({
 
                 {/* Conversations list */}
                 <div className="flex-1 overflow-y-auto px-2">
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 py-3">
-                        {initialMatchedConversations.length > 0 ? "Messages" : "No matches yet"}
+                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 py-3 flex justify-between items-center">
+                        <span>{conversations.length > 0 ? "Messages" : "No matches yet"}</span>
                     </div>
-                    {initialMatchedConversations.map((convo) => {
+                    {conversations.map((convo) => {
                         const { match, otherUser } = convo;
                         const mainPhoto = otherUser.photos?.find(p => p.order === 0)?.url;
                         const isActive = selectedMatchId === match.id;
+                        const hasUnread = match.unread_count > 0;
 
                         return (
                             <div
                                 key={match.id}
-                                onClick={() => setSelectedMatchId(match.id)}
+                                onClick={() => handleSelectMatch(match.id)}
                                 className={`flex items-center gap-4 px-4 py-4 rounded-2xl cursor-pointer transition-all border-l-4 ${isActive
                                     ? "bg-primary/5 border-primary shadow-sm"
                                     : "hover:bg-gray-50 border-transparent"
@@ -65,14 +77,24 @@ export default function MatchesClient({
                                             <span className="material-symbols-outlined text-gray-400 text-2xl">person</span>
                                         </div>
                                     )}
+                                    {hasUnread && !isActive && (
+                                        <div className="absolute -top-1 -right-1 size-4 bg-primary rounded-full border-2 border-white flex items-center justify-center">
+                                            <div className="size-1.5 bg-white rounded-full" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex flex-col justify-center flex-1 min-w-0">
                                     <div className="flex justify-between items-baseline mb-0.5">
-                                        <p className={`text-[#111] text-base leading-normal truncate ${isActive ? "font-black" : "font-bold"}`}>
+                                        <p className={`text-[#111] text-base leading-normal truncate ${isActive || hasUnread ? "font-black" : "font-bold"}`}>
                                             {otherUser.name}
                                         </p>
+                                        {hasUnread && !isActive && (
+                                            <span className="bg-primary text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                                                {match.unread_count}
+                                            </span>
+                                        )}
                                     </div>
-                                    <p className="text-sm text-gray-400 leading-normal truncate font-medium">
+                                    <p className={`text-sm leading-normal truncate font-medium ${hasUnread && !isActive ? "text-primary" : "text-gray-400"}`}>
                                         {otherUser.role === "recruiter"
                                             ? [otherUser.job_title, otherUser.company_name].filter(Boolean).join(" · ")
                                             : otherUser.previous_occupation || "Applicant"}
@@ -82,7 +104,7 @@ export default function MatchesClient({
                         );
                     })}
 
-                    {initialMatchedConversations.length === 0 && (
+                    {conversations.length === 0 && (
                         <div className="p-8 text-center flex flex-col items-center gap-4">
                             <div className="size-20 rounded-full bg-gray-50 flex items-center justify-center">
                                 <span className="material-symbols-outlined text-gray-300 text-4xl">favorite</span>
@@ -95,14 +117,26 @@ export default function MatchesClient({
                 </div>
             </aside>
 
-            {/* Chat window space */}
-            <main className="flex-1 flex flex-col bg-white">
+            {/* Chat window space - hidden on mobile if no chat selected */}
+            <main className={`flex-1 flex flex-col bg-white ${!selectedMatchId ? "hidden md:flex" : "flex"}`}>
                 {selectedConvo ? (
-                    <ChatWindow
-                        matchId={selectedConvo.match.id}
-                        currentUser={currentUser}
-                        otherUser={selectedConvo.otherUser}
-                    />
+                    <div className="flex flex-col h-full">
+                        {/* Mobile Back Button */}
+                        <div className="md:hidden px-4 pt-4 shrink-0">
+                            <button
+                                onClick={() => setSelectedMatchId(undefined)}
+                                className="flex items-center gap-1 text-primary font-black text-sm"
+                            >
+                                <span className="material-symbols-outlined">chevron_left</span>
+                                Back to Matches
+                            </button>
+                        </div>
+                        <ChatWindow
+                            matchId={selectedConvo.match.id}
+                            currentUser={currentUser}
+                            otherUser={selectedConvo.otherUser}
+                        />
+                    </div>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gray-50/50">
                         <div className="size-24 rounded-full bg-white shadow-sm flex items-center justify-center mb-6">
