@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Match, Swipe, SwipeAction, User, UserRole
-from app.schemas import MatchResponse, SwipeCreate, SwipeResponse
+from app.schemas import MatchResponse, SwipeCreate, SwipeResponse, UserResponse
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/matches", tags=["matches"])
 @router.post("/{user_id}/swipe", response_model=SwipeResponse)
 def swipe(user_id: int, swipe_data: SwipeCreate, db: Session = Depends(get_db)):
     if swipe_data.action not in [a.value for a in SwipeAction]:
-        raise HTTPException(status_code=400, detail="Invalid action, must be 'like' or 'pass'")
+        raise HTTPException(status_code=400, detail="Invalid action. Must be 'like' or 'pass'")
 
     swiper = db.query(User).filter(User.id == user_id).first()
     if not swiper:
@@ -20,6 +20,13 @@ def swipe(user_id: int, swipe_data: SwipeCreate, db: Session = Depends(get_db)):
     target = db.query(User).filter(User.id == swipe_data.target_id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Target user not found")
+
+    # Enforce cross-role swiping only
+    if swiper.role == target.role:
+        raise HTTPException(
+            status_code=400,
+            detail="Recruiters can only swipe on applicants and vice versa",
+        )
 
     existing = (
         db.query(Swipe)
@@ -38,6 +45,7 @@ def swipe(user_id: int, swipe_data: SwipeCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_swipe)
 
+    # Check for a mutual like → create a match
     is_match = False
     if swipe_data.action == SwipeAction.LIKE.value:
         reverse = (
@@ -50,12 +58,8 @@ def swipe(user_id: int, swipe_data: SwipeCreate, db: Session = Depends(get_db)):
             .first()
         )
         if reverse:
-            applicant_id = (
-                user_id if swiper.role == UserRole.APPLICANT else swipe_data.target_id
-            )
-            recruiter_id = (
-                user_id if swiper.role == UserRole.RECRUITER else swipe_data.target_id
-            )
+            applicant_id = user_id if swiper.role == UserRole.APPLICANT else swipe_data.target_id
+            recruiter_id = user_id if swiper.role == UserRole.RECRUITER else swipe_data.target_id
             match = Match(applicant_id=applicant_id, recruiter_id=recruiter_id)
             db.add(match)
             db.commit()
@@ -76,17 +80,16 @@ def get_matches(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    matches = (
+    return (
         db.query(Match)
         .filter((Match.applicant_id == user_id) | (Match.recruiter_id == user_id))
         .all()
     )
-    return matches
 
 
-@router.get("/{user_id}/candidates", response_model=list)
+@router.get("/{user_id}/candidates", response_model=list[UserResponse])
 def get_candidates(user_id: int, db: Session = Depends(get_db)):
-    """Get users that the current user hasn't swiped on yet."""
+    """Return users of the opposite role that this user hasn't swiped on yet."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -94,22 +97,11 @@ def get_candidates(user_id: int, db: Session = Depends(get_db)):
     swiped_ids = (
         db.query(Swipe.target_id).filter(Swipe.swiper_id == user_id).subquery()
     )
-
-    # Applicants see recruiters, recruiters see applicants
     target_role = UserRole.RECRUITER if user.role == UserRole.APPLICANT else UserRole.APPLICANT
 
-    candidates = (
+    return (
         db.query(User)
         .filter(User.role == target_role, User.id != user_id, User.id.notin_(swiped_ids))
         .limit(20)
         .all()
     )
-    return [
-        {
-            "id": c.id,
-            "email": c.email,
-            "full_name": c.full_name,
-            "role": c.role.value if hasattr(c.role, "value") else c.role,
-        }
-        for c in candidates
-    ]
