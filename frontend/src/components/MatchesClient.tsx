@@ -74,8 +74,8 @@ export default function MatchesClient({
 
                 <div className="h-px bg-neutral-100 w-full mb-2" />
 
-                {/* Conversations list - pad the bottom for nav bar */}
-                <div className="flex-1 overflow-y-auto px-2 pb-[90px] md:pb-6">
+                {/* Conversations list - pad the bottom for nav bar universally */}
+                <div className="flex-1 overflow-y-auto px-2 pb-[90px]">
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 py-3 flex justify-between items-center">
                         <span>{conversations.length > 0 ? "Messages" : "No matches yet"}</span>
                     </div>
@@ -107,8 +107,8 @@ export default function MatchesClient({
                                         </div>
                                     )}
                                     {hasUnread && !isActive && (
-                                        <div className="absolute -top-1 -right-1 size-4 bg-primary rounded-full border-2 border-white flex items-center justify-center">
-                                            <div className="size-1.5 bg-white rounded-full" />
+                                        <div className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-primary rounded-full border-2 border-white flex items-center justify-center text-[10px] font-black text-white shadow-sm">
+                                            {match.unread_count > 9 ? "9+" : match.unread_count}
                                         </div>
                                     )}
                                 </div>
@@ -117,11 +117,6 @@ export default function MatchesClient({
                                         <p className={`text-[#111] text-base leading-normal truncate ${isActive || hasUnread ? "font-black" : "font-bold"}`}>
                                             {otherUser.name}
                                         </p>
-                                        {hasUnread && !isActive && (
-                                            <span className="bg-primary text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
-                                                {match.unread_count}
-                                            </span>
-                                        )}
                                     </div>
                                     <p className={`text-sm leading-normal truncate font-medium ${hasUnread && !isActive ? "text-primary" : "text-gray-400"}`}>
                                         {otherUser.role === "recruiter"
@@ -160,8 +155,8 @@ export default function MatchesClient({
                                 Back to Matches
                             </button>
                         </div>
-                        {/* Chat content needs its own bottom padding for nav bar */}
-                        <div className="flex-1 min-h-0 pb-[85px] md:pb-0">
+                        {/* Chat content needs its own bottom padding universally for nav bar */}
+                        <div className="flex-1 min-h-0 pb-[85px]">
                             <ChatWindow
                                 matchId={selectedConvo.match.id}
                                 currentUser={currentUser}
