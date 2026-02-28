@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import { auth0 } from "@/lib/auth0";
 import { redirect } from "next/navigation";
+import { fetchCurrentUser } from "@/lib/api";
 
 const SARAH_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBxdvkO-iwyy-_iY-aBxDdW-N89xx3cmFXjGoL8t0ecKGjjsfm-R7wnSYk2We8gDDJhFRsiFFwk66atkx6BDqm4038Gfxzy3rFX_C59SeVKWqctd6jf3UbSIO1oVxJdb6s0QjJPpg5171MoSc10FxjiN7-THcVv-4yJCRNL3Gep0kjbuiXNFYsY0vLXNsT7GMeF7-UlDwurob-1hRyzpjs3HfXGe_i5pl3lF24uvtLXJrtLJuBiIstkoAPL2v9LGN_jxyw82RClkDuq";
@@ -51,6 +52,11 @@ export default async function MatchesPage() {
   const session = await auth0.getSession();
   if (!session) {
     redirect("/auth/login?returnTo=/matches");
+  }
+
+  const user = await fetchCurrentUser(session.user.email!);
+  if (!user) {
+    redirect("/onboarding");
   }
 
   return (
@@ -124,8 +130,8 @@ export default async function MatchesPage() {
               <div
                 key={convo.id}
                 className={`flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-colors border-l-4 ${convo.active
-                    ? "bg-primary/10 border-primary"
-                    : "hover:bg-background-light border-transparent"
+                  ? "bg-primary/10 border-primary"
+                  : "hover:bg-background-light border-transparent"
                   }`}
               >
                 <div className="relative shrink-0">
@@ -153,8 +159,8 @@ export default async function MatchesPage() {
                   </div>
                   <p
                     className={`text-sm leading-normal line-clamp-1 truncate ${convo.active
-                        ? "text-text-primary-light font-medium"
-                        : "text-text-secondary-light font-normal"
+                      ? "text-text-primary-light font-medium"
+                      : "text-text-secondary-light font-normal"
                       }`}
                   >
                     {convo.message}

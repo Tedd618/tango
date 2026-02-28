@@ -7,37 +7,43 @@ PostgreSQL via Docker. ORM: SQLAlchemy. Migrations: Alembic.
 ## Tables
 
 ### `users`
-Core table for both recruiters and applicants.
+Core table for both recruiters and applicants. Columns are role-specific — not all will be populated for every user.
 
-| Column | Type | Notes |
-|---|---|---|
-| `id` | int | Primary key |
-| `email` | string | Unique, used for Auth0 |
-| `name` | string | |
-| `role` | enum | `recruiter` or `applicant` |
-| `gender` | string | Optional |
-| `location` | string | Optional |
-| `nationality` | string | Optional |
-| `industry` | string | Area of industry |
-| `salary_min` | int | Optional |
-| `salary_max` | int | Optional |
-| `previous_occupation` | string | Optional |
-| `education` | string | Optional |
-| `is_premium` | bool | Premium account flag |
-| `resume_url` | string | Link to uploaded PDF |
-| `created_at` | datetime | |
+| Column | Type | Role | Notes |
+|---|---|---|---|
+| `id` | int | Both | Primary key |
+| `email` | string | Both | Unique, used for Auth0 login |
+| `name` | string | Both | Display name |
+| `role` | enum | Both | `recruiter` or `applicant` — set on onboarding |
+| `industry` | string | Both | Area of work |
+| `is_premium` | bool | Both | Premium account flag |
+| `created_at` | datetime | Both | |
+| `gender` | string | Applicant | Optional |
+| `location` | string | Applicant | Optional |
+| `nationality` | string | Applicant | Optional |
+| `salary_min` | int | Applicant | Salary expectation lower bound |
+| `salary_max` | int | Applicant | Salary expectation upper bound |
+| `previous_occupation` | string | Applicant | Optional |
+| `education` | string | Applicant | Optional |
+| `resume_url` | string | Applicant | Link to resume/portfolio URL |
+| `company_name` | string | Recruiter | Company the recruiter represents |
+| `job_title` | string | Recruiter | Recruiter's job title |
+| `job_description` | text | Recruiter | Freeform description of the role being hired for |
 
 ---
 
 ### `prompt_templates`
-Preset prompts written by devs. Users answer these on their profile.
+Preset prompts written by devs. Users answer these on their profile. Prompts are role-targeted.
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | int | Primary key |
 | `type` | enum | `poll` or `question` |
-| `text` | string | The prompt text |
+| `text` | string | The prompt text shown to the user |
+| `target_role` | string | `applicant`, `recruiter`, or `both` |
 | `options` | text | JSON array of choices (polls only) |
+
+> Run `seed_prompts.py` to populate default applicant and recruiter questions.
 
 ---
 
@@ -55,15 +61,15 @@ A user's answer to a prompt template.
 ---
 
 ### `photos`
-A user's profile photos.
+A user's profile photos. Currently max 1 photo per user (old ones are deleted on upload).
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | int | Primary key |
 | `user_id` | int | FK → users |
-| `url` | string | Hosted image URL |
+| `url` | string | Absolute URL to static file (e.g. `http://localhost:8000/static/uploads/...`) |
 | `caption` | string | Optional |
-| `order` | int | Display order |
+| `order` | int | Display order (`0` = main photo) |
 | `created_at` | datetime | |
 
 ---
@@ -146,4 +152,11 @@ matches ──< messages
 # After changing models.py
 PYTHONPATH=. .venv/bin/alembic revision --autogenerate -m "describe change"
 PYTHONPATH=. .venv/bin/alembic upgrade head
+```
+
+## Seeding Prompt Templates
+
+```bash
+# Populates default applicant and recruiter questions
+PYTHONPATH=. .venv/bin/python seed_prompts.py
 ```

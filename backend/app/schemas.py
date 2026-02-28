@@ -79,6 +79,9 @@ class UserBase(BaseModel):
     salary_max: int | None = None
     previous_occupation: str | None = None
     education: str | None = None
+    company_name: str | None = None
+    job_title: str | None = None
+    job_description: str | None = None
 
 
 class UserCreate(UserBase):
@@ -96,6 +99,9 @@ class UserUpdate(BaseModel):
     previous_occupation: str | None = None
     education: str | None = None
     resume_url: str | None = None
+    company_name: str | None = None
+    job_title: str | None = None
+    job_description: str | None = None
 
 
 class UserResponse(UserBase):

@@ -38,9 +38,6 @@ export default function Header() {
             <div className="size-10 rounded-full bg-gray-200 animate-pulse" />
           ) : user ? (
             <>
-              <button className="hidden sm:flex h-9 px-4 items-center justify-center rounded-full bg-primary hover:bg-primary-dark text-white text-sm font-bold transition-all shadow-sm hover:shadow-md">
-                Post Job
-              </button>
               {/* User avatar with dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button

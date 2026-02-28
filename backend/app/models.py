@@ -46,6 +46,9 @@ class User(Base):
     salary_max: Mapped[int | None] = mapped_column(Integer)
     previous_occupation: Mapped[str | None] = mapped_column(String(255))
     education: Mapped[str | None] = mapped_column(String(255))
+    company_name: Mapped[str | None] = mapped_column(String(255))
+    job_title: Mapped[str | None] = mapped_column(String(255))
+    job_description: Mapped[str | None] = mapped_column(Text)
 
     is_premium: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     resume_url: Mapped[str | None] = mapped_column(String(500))
@@ -72,6 +75,7 @@ class PromptTemplate(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     type: Mapped[PromptType] = mapped_column(Enum(PromptType), nullable=False)
     text: Mapped[str] = mapped_column(String(500), nullable=False)
+    target_role: Mapped[str] = mapped_column(String(50), default="both", nullable=False)
     # For polls: JSON array of option strings e.g. '["Option A", "Option B"]'
     # For questions: null
     options: Mapped[str | None] = mapped_column(Text)
