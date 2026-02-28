@@ -143,3 +143,38 @@ export async function deleteUserPrompt(userId: number, promptId: number) {
         throw new Error("Failed to delete prompt");
     }
 }
+
+export interface SwipeResult {
+    id: number;
+    swiper_id: number;
+    target_id: number;
+    action: string;
+    is_match: boolean;
+    created_at: string;
+}
+
+export async function fetchCandidates(userId: number): Promise<UserProfile[]> {
+    const res = await fetch(`${API_BASE}/matches/${userId}/candidates`);
+    if (!res.ok) throw new Error("Failed to fetch candidates");
+    return res.json();
+}
+
+export async function fetchInbox(userId: number): Promise<UserProfile[]> {
+    const res = await fetch(`${API_BASE}/matches/${userId}/inbox`);
+    if (!res.ok) throw new Error("Failed to fetch inbox");
+    return res.json();
+}
+
+export async function swipeUser(
+    userId: number,
+    targetId: number,
+    action: "like" | "pass"
+): Promise<SwipeResult> {
+    const res = await fetch(`${API_BASE}/matches/${userId}/swipe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target_id: targetId, action }),
+    });
+    if (!res.ok) throw new Error("Failed to swipe");
+    return res.json();
+}

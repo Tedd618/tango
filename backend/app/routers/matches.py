@@ -107,6 +107,38 @@ def get_candidates(user_id: int, db: Session = Depends(get_db)):
     )
 
 
+@router.get("/{user_id}/inbox", response_model=list[UserWithDetails])
+def get_inbox(user_id: int, db: Session = Depends(get_db)):
+    """For recruiters: return applicants who liked this recruiter, that this recruiter hasn't reviewed yet."""
+    recruiter = db.query(User).filter(User.id == user_id).first()
+    if not recruiter:
+        raise HTTPException(status_code=404, detail="User not found")
+    if recruiter.role != UserRole.RECRUITER:
+        raise HTTPException(status_code=400, detail="Only recruiters have an inbox")
+
+    # Applicants who liked this recruiter
+    liked_me_ids = (
+        db.query(Swipe.swiper_id)
+        .filter(Swipe.target_id == user_id, Swipe.action == SwipeAction.LIKE)
+        .subquery()
+    )
+
+    # Applicants this recruiter already reviewed
+    already_swiped_ids = (
+        db.query(Swipe.target_id).filter(Swipe.swiper_id == user_id).subquery()
+    )
+
+    return (
+        db.query(User)
+        .filter(
+            User.id.in_(liked_me_ids),
+            User.id.notin_(already_swiped_ids),
+        )
+        .limit(50)
+        .all()
+    )
+
+
 @router.get("/match/{match_id}", response_model=MatchResponse)
 def get_match(match_id: int, db: Session = Depends(get_db)):
     match = db.query(Match).filter(Match.id == match_id).first()
