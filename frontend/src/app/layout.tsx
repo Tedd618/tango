@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Auth0Provider } from "@auth0/nextjs-auth0/client";
 import BottomNav from "@/components/BottomNav";
+import { syncUserWithBackend } from "@/lib/sync";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -15,11 +16,14 @@ export const metadata: Metadata = {
   description: "A swipe-based matching app connecting job applicants with recruiters",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Attempt to sync user to DB if they are logged in.
+  await syncUserWithBackend();
+
   return (
     <html lang="en">
       <head>
