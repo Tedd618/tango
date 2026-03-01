@@ -56,7 +56,7 @@ export default function Header() {
             <>
               {/* Role Badge */}
               {dbUser && (
-                <div className="hidden sm:flex items-center px-3 py-1 bg-gray-100 rounded-full border border-gray-200">
+                <div className="flex items-center px-3 py-1 bg-gray-100 rounded-full border border-gray-200">
                   <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
                     {dbUser.role}
                   </span>
