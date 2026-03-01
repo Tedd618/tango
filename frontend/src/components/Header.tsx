@@ -59,14 +59,10 @@ export default function Header() {
                       <p className="text-sm font-bold text-text-primary-light truncate">{user.name}</p>
                       <p className="text-xs text-text-secondary-light truncate">{user.email}</p>
                     </div>
-                    <Link
-                      href="/settings"
-                      onClick={() => setIsDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-text-primary-light hover:bg-gray-50 hover:text-primary transition-colors"
-                    >
+                    <div className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-400 cursor-default">
                       <span className="material-symbols-outlined text-[1.2rem]">settings</span>
                       Settings
-                    </Link>
+                    </div>
                     <a
                       href="/auth/logout"
                       className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
