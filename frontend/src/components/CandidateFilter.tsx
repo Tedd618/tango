@@ -11,14 +11,12 @@ export default function CandidateFilter() {
 
     const [industry, setIndustry] = useState(searchParams?.get("industry") || "");
     const [location, setLocation] = useState(searchParams?.get("location") || "");
-    const [gender, setGender] = useState(searchParams?.get("gender") || "");
     const [salaryMin, setSalaryMin] = useState(searchParams?.get("salary_min") || "");
 
     const handleApply = () => {
         const params = new URLSearchParams(searchParams?.toString() || "");
         if (industry) params.set("industry", industry); else params.delete("industry");
         if (location) params.set("location", location); else params.delete("location");
-        if (gender) params.set("gender", gender); else params.delete("gender");
         if (salaryMin) params.set("salary_min", salaryMin); else params.delete("salary_min");
 
         setIsOpen(false);
@@ -28,7 +26,6 @@ export default function CandidateFilter() {
     const handleClear = () => {
         setIndustry("");
         setLocation("");
-        setGender("");
         setSalaryMin("");
         setIsOpen(false);
         router.push("/discover");
@@ -41,7 +38,7 @@ export default function CandidateFilter() {
                 className="flex items-center gap-2 px-4 py-2 bg-white rounded-full text-sm font-bold text-[#111] shadow-[0_2px_10px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.1)] transition-all"
             >
                 <span className="material-symbols-outlined text-[18px]">tune</span>
-                Filter Candidates
+                Filter Job Posts
             </button>
 
             {isOpen && (
@@ -72,16 +69,6 @@ export default function CandidateFilter() {
                                     value={location}
                                     onChange={e => setLocation(e.target.value)}
                                     placeholder="e.g. New York"
-                                    className="w-full bg-[#fbfbfb] rounded-xl px-4 py-3 text-sm font-bold outline-none border-2 border-transparent focus:border-primary transition-colors"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Gender</label>
-                                <input
-                                    type="text"
-                                    value={gender}
-                                    onChange={e => setGender(e.target.value)}
-                                    placeholder="e.g. Female"
                                     className="w-full bg-[#fbfbfb] rounded-xl px-4 py-3 text-sm font-bold outline-none border-2 border-transparent focus:border-primary transition-colors"
                                 />
                             </div>
