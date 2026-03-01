@@ -1,12 +1,29 @@
+import os
+from dotenv import load_dotenv
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.database import Base
-from app.models import Like, Match, Message, Photo, PromptTemplate, Swipe, User, UserPrompt  # noqa: F401
+from app.models import (
+    Like,
+    Match,
+    Message,
+    Photo,
+    PromptTemplate,
+    Swipe,
+    User,
+    UserPrompt,
+)  # noqa: F401
+
+load_dotenv()  # load .env file
 
 config = context.config
+config.set_main_option(
+    "sqlalchemy.url", os.environ["DATABASE_URL"]
+)  # override alembic.ini
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 

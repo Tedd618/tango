@@ -54,7 +54,7 @@ tango/
 ### Prerequisites
 
 - Node.js 18+
-- Python 3.12+
+- Python 3.12-3.13
 - Docker (for PostgreSQL)
 - An Auth0 account
 
