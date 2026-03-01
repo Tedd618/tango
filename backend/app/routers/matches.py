@@ -120,7 +120,16 @@ def mark_as_read(match_id: int, user_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/{user_id}/candidates", response_model=list[UserWithDetails])
-def get_candidates(user_id: int, db: Session = Depends(get_db)):
+def get_candidates(
+    user_id: int,
+    gender: str | None = None,
+    location: str | None = None,
+    nationality: str | None = None,
+    industry: str | None = None,
+    salary_min: int | None = None,
+    salary_max: int | None = None,
+    db: Session = Depends(get_db)
+):
     """Return users of the opposite role that this user hasn't swiped on yet."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -131,12 +140,22 @@ def get_candidates(user_id: int, db: Session = Depends(get_db)):
     )
     target_role = UserRole.RECRUITER if user.role == UserRole.APPLICANT else UserRole.APPLICANT
 
-    return (
-        db.query(User)
-        .filter(User.role == target_role, User.id != user_id, User.id.notin_(swiped_ids))
-        .limit(20)
-        .all()
-    )
+    query = db.query(User).filter(User.role == target_role, User.id != user_id, User.id.notin_(swiped_ids))
+
+    if gender:
+        query = query.filter(User.gender.ilike(f"%{gender}%"))
+    if location:
+        query = query.filter(User.location.ilike(f"%{location}%"))
+    if nationality:
+        query = query.filter(User.nationality.ilike(f"%{nationality}%"))
+    if industry:
+        query = query.filter(User.industry.ilike(f"%{industry}%"))
+    if salary_min is not None:
+        query = query.filter(User.salary_min >= salary_min)
+    if salary_max is not None:
+        query = query.filter(User.salary_max <= salary_max)
+
+    return query.limit(20).all()
 
 
 @router.get("/{user_id}/inbox", response_model=list[UserWithDetails])
