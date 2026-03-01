@@ -44,7 +44,7 @@ export default function SwipeStack({ cards, currentUserId, mode }: SwipeStackPro
             <div className="fixed inset-0 z-50 bg-gradient-to-br from-primary via-secondary to-primary flex flex-col items-center justify-center gap-8 p-8 text-white">
                 <div className="text-center animate-in fade-in zoom-in duration-500">
                     <div className="text-7xl mb-6">🎉</div>
-                    <h1 className="text-5xl font-black tracking-tight mb-3">It&apos;s a Match!</h1>
+                    <h1 className="text-5xl font-black tracking-tight mb-3">Good things are coming!</h1>
                     <p className="text-lg font-bold opacity-90">
                         You and <span className="text-white underline underline-offset-4">{matchedWith.name}</span> liked each other.
                     </p>
