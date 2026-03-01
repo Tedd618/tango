@@ -192,10 +192,19 @@ def get_inbox(user_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/{user_id}/history", status_code=204)
 def clear_swipe_history(user_id: int, db: Session = Depends(get_db)):
-    """Delete all swipes initiated by this user so they can rediscover profiles."""
-    if not db.query(User).filter(User.id == user_id).first():
+    """Delete all swipes and matches for this user so they can completely start fresh."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    db.query(Swipe).filter(Swipe.swiper_id == user_id).delete()
+        
+    # Delete all swipes (both given and received to fully reset visibility)
+    db.query(Swipe).filter((Swipe.swiper_id == user_id) | (Swipe.target_id == user_id)).delete(synchronize_session=False)
+    
+    # Delete all matches (which cascades to delete all messages via DB relationships)
+    matches = db.query(Match).filter((Match.recruiter_id == user_id) | (Match.applicant_id == user_id)).all()
+    for match in matches:
+        db.delete(match)
+        
     db.commit()
 
 
