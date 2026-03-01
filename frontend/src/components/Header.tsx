@@ -43,7 +43,7 @@ export default function Header() {
           <div className="size-8 text-primary flex items-center justify-center">
             <span className="material-symbols-outlined text-3xl filled">interests</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary-light">
+          <h1 className="text-2xl font-tiempos text-text-primary-light">
             Tango
           </h1>
         </Link>

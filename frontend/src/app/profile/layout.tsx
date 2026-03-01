@@ -21,7 +21,7 @@ export default async function ProfileLayout({
     }
 
     return (
-        <div className="bg-white min-h-screen text-[#111] pb-24 font-sans flex flex-col items-center">
+        <div className="bg-white min-h-screen text-[#111] pb-24 font-tiempos flex flex-col items-center">
             <Header />
 
             <div className="max-w-[450px] w-full flex flex-col">

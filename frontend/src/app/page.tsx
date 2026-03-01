@@ -21,7 +21,7 @@ export default function Home() {
         <div className="size-8 text-primary flex items-center justify-center">
           <span className="material-symbols-outlined text-3xl filled">interests</span>
         </div>
-        <span className="text-2xl font-bold tracking-tight text-white">Tango</span>
+        <span className="text-2xl font-tiempos tracking-tight text-white">Tango</span>
       </header>
 
       {/* Hero */}

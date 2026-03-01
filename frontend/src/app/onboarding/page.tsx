@@ -45,7 +45,7 @@ export default function OnboardingPage() {
         <div className="min-h-screen bg-[#fbfbfb] flex flex-col items-center justify-center p-6 pb-20 fade-in animate-in duration-500 relative z-50">
             <div className="max-w-md w-full flex flex-col items-center text-center gap-8 bg-white p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
                 <div>
-                    <h1 className="text-3xl font-black text-[#111] mb-2 font-display">Welcome to Tango!</h1>
+                    <h1 className="text-3xl font-black text-[#111] mb-2 font-display">Welcome to <span className="font-tiempos">Tango!</span></h1>
                     <p className="text-sm font-bold text-gray-400">How do you want to use the app today?</p>
                 </div>
 
