@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useState, useRef, useEffect } from "react";
 import { fetchCurrentUser, UserProfile } from "@/lib/api";
@@ -40,9 +41,7 @@ export default function Header() {
       <div className="px-4 md:px-8 max-w-7xl mx-auto flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="size-8 text-primary flex items-center justify-center">
-            <span className="material-symbols-outlined text-3xl filled">interests</span>
-          </div>
+          <Image src="/tangoLogo.png" alt="Tango" width={32} height={32} className="size-8" />
           <h1 className="text-2xl font-tiempos text-text-primary-light">
             Tango
           </h1>

@@ -13,6 +13,7 @@ const navItems = [
 ];
 
 const NAV_ROUTES = navItems.map((i) => i.href);
+const DISCARD_ROUTES = ["/profile/edit"];
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -40,7 +41,8 @@ export default function BottomNav() {
     return () => clearInterval(interval);
   }, [authUser]);
 
-  if (!NAV_ROUTES.includes(pathname)) return null;
+  const isDiscardRoute = DISCARD_ROUTES.includes(pathname);
+  if (!NAV_ROUTES.includes(pathname) && !isDiscardRoute) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-light/95 backdrop-blur-md border-t border-gray-100 flex justify-center">
@@ -48,9 +50,10 @@ export default function BottomNav() {
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const isMatches = item.href === "/matches";
+          const NavEl = isDiscardRoute ? "a" : Link;
 
           return (
-            <Link
+            <NavEl
               key={item.href}
               href={item.href}
               className={`relative flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-300 ${isActive
@@ -73,7 +76,7 @@ export default function BottomNav() {
               <span className="text-[10px] font-black uppercase tracking-tighter mt-0.5">
                 {item.label}
               </span>
-            </Link>
+            </NavEl>
           );
         })}
       </div>

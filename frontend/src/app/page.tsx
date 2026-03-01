@@ -18,9 +18,7 @@ export default function Home() {
 
       {/* Minimal header */}
       <header className="px-8 py-5 flex items-center gap-2">
-        <div className="size-8 text-primary flex items-center justify-center">
-          <span className="material-symbols-outlined text-3xl filled">interests</span>
-        </div>
+        <Image src="/tangoLogo.png" alt="Tango" width={32} height={32} className="size-8" />
         <span className="text-2xl font-tiempos tracking-tight text-white">Tango</span>
       </header>
 
