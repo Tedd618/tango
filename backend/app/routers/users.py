@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Response
 import uuid
 import os
 import shutil
@@ -78,37 +78,44 @@ def add_photo(user_id: int, photo: PhotoCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/{user_id}/upload-photo", response_model=PhotoResponse)
-def upload_photo(user_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_photo(user_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Create directory if not exists
-    upload_dir = "static/uploads"
-    if not os.path.exists(upload_dir):
-        os.makedirs(upload_dir)
-
-    # Generate unique filename
-    file_extension = os.path.splitext(file.filename)[1]
-    filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = os.path.join(upload_dir, filename)
-
-    # Save file
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    # Public URL
-    url = f"http://localhost:8000/static/uploads/{filename}"
+    image_data = await file.read()
+    content_type = file.content_type
 
     # Delete existing photos (single photo rule)
     db.query(Photo).filter(Photo.user_id == user_id).delete()
 
-    # Create new photo record
-    db_photo = Photo(user_id=user_id, url=url, order=0)
+    # Create new photo record with empty URL placeholder first
+    db_photo = Photo(
+        user_id=user_id, 
+        url="", 
+        order=0,
+        image_data=image_data,
+        content_type=content_type
+    )
     db.add(db_photo)
     db.commit()
     db.refresh(db_photo)
+
+    # Update URL to self-reference the new dynamic image endpoint
+    db_photo.url = f"http://localhost:8000/api/users/photos/{db_photo.id}/image"
+    db.commit()
+    db.refresh(db_photo)
+    
     return db_photo
+
+
+@router.get("/photos/{photo_id}/image")
+def get_photo_image(photo_id: int, db: Session = Depends(get_db)):
+    db_photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    if not db_photo or not db_photo.image_data:
+        raise HTTPException(status_code=404, detail="Image not found")
+        
+    return Response(content=db_photo.image_data, media_type=db_photo.content_type)
 
 
 @router.delete("/{user_id}/photos/{photo_id}", status_code=204)

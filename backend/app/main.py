@@ -8,11 +8,6 @@ from app.routers import matches, prompts, users
 
 app = FastAPI(title="Tango API", version="0.1.0")
 
-# Ensure static directory exists
-os.makedirs("static/uploads", exist_ok=True)
-
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,

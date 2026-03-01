@@ -43,10 +43,10 @@ export default async function MatchesPage({
   const selectedMatchId = searchParams.match ? parseInt(searchParams.match) : undefined;
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-background-light text-text-primary-light">
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-background-light text-text-primary-light">
       <Header />
 
-      <div className="flex-1 overflow-hidden pb-[80px]">
+      <div className="flex-1 flex flex-col overflow-hidden pb-[80px]">
         <MatchesClient
           currentUser={user}
           initialMatchedConversations={matchedConversations}

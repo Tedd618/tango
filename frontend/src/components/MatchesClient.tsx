@@ -65,7 +65,7 @@ export default function MatchesClient({
     };
 
     return (
-        <div className="flex h-full overflow-hidden min-h-0">
+        <div className="flex flex-1 w-full overflow-hidden min-h-0">
             {/* Sidebar - hidden on mobile if a chat is selected */}
             <aside className={`w-full md:w-[400px] flex flex-col border-r border-neutral-200 bg-white z-10 shrink-0 ${selectedMatchId ? "hidden md:flex" : "flex"} min-h-0`}>
                 <div className="px-6 pt-6 pb-2 shrink-0">
