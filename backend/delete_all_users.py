@@ -10,13 +10,11 @@ db = SessionLocal()
 
 print("Deleting all user data...")
 
-# Because of cascade deletes configured on the User model,
-# deleting all users will also automatically delete all associated:
-# - Photos
-# - Swipes
-# - Matches
-# - Messages
-# - UserPrompts
+db.query(Message).delete()
+db.query(Match).delete()
+db.query(Swipe).delete()
+db.commit()
+
 users = db.query(User).all()
 num = len(users)
 for user in users:

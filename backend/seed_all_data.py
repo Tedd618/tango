@@ -4,11 +4,23 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from app.database import SessionLocal
-from app.models import User, UserRole
+from app.models import User, UserRole, Photo
 
 db = SessionLocal()
 
 print("Seeding 15 Recruiters and 15 Applicants...")
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+try:
+    with open(os.path.join(SCRIPT_DIR, "seed_images", "applicant_photo.jpg"), "rb") as f:
+        applicant_photo_bytes = f.read()
+    with open(os.path.join(SCRIPT_DIR, "seed_images", "recruiter_photo.png"), "rb") as f:
+        recruiter_photo_bytes = f.read()
+except FileNotFoundError:
+    print("Warning: Could not find seed_images/. Photos will not be attached.")
+    applicant_photo_bytes = None
+    recruiter_photo_bytes = None
 
 recruiters = [
     {
@@ -221,7 +233,7 @@ applicants = [
         "previous_occupation": "Frontend Web Developer at Webify",
         "education": "B.S. Computer Science, UC Berkeley",
         "gender": "Female",
-        "resume_url": "https://example.com/jane_doe_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "John Smith",
@@ -235,7 +247,7 @@ applicants = [
         "previous_occupation": "Financial Analyst at WallSt Inc",
         "education": "M.S. Finance, NYU Stern",
         "gender": "Male",
-        "resume_url": "https://example.com/john_smith_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Elena Rodriguez",
@@ -249,7 +261,7 @@ applicants = [
         "previous_occupation": "Backend Engineer at SaaS Co",
         "education": "B.S. Software Engineering, Polytechnic University of Madrid",
         "gender": "Female",
-        "resume_url": "https://example.com/elena_r_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Marcus Johnson",
@@ -263,7 +275,7 @@ applicants = [
         "previous_occupation": "Data Analyst at HealthPlus",
         "education": "M.S. Data Science, MIT",
         "gender": "Male",
-        "resume_url": "https://example.com/marcus_j_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Sophia Lee",
@@ -277,7 +289,7 @@ applicants = [
         "previous_occupation": "UI Designer at ShopStart",
         "education": "B.A. Graphic Design, Central Saint Martins",
         "gender": "Female",
-        "resume_url": "https://example.com/sophia_l_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Mohammed Ali",
@@ -291,7 +303,7 @@ applicants = [
         "previous_occupation": "Cloud Systems Engineer at DataWiz",
         "education": "B.S. Computer Engineering, University of Waterloo",
         "gender": "Male",
-        "resume_url": "https://example.com/mohammed_a_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Ji-Hoon Park",
@@ -305,7 +317,7 @@ applicants = [
         "previous_occupation": "Mobile Developer at AppCrafters",
         "education": "B.S. Computer Science, Seoul National University",
         "gender": "Male",
-        "resume_url": "https://example.com/jihoon_p_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Priya Patel",
@@ -319,7 +331,7 @@ applicants = [
         "previous_occupation": "Jr. React Developer at StartupX",
         "education": "Bootcamp Graduate, General Assembly",
         "gender": "Female",
-        "resume_url": "https://example.com/priya_p_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Aiden Clarke",
@@ -333,7 +345,7 @@ applicants = [
         "previous_occupation": "IT Security Specialist",
         "education": "B.S. Information Security, DePaul University",
         "gender": "Male",
-        "resume_url": "https://example.com/aiden_c_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Yuki Tanaka",
@@ -347,7 +359,7 @@ applicants = [
         "previous_occupation": "Embedded Systems Engineer at RoboMakers",
         "education": "M.S. Robotics, University of Tokyo",
         "gender": "Male",
-        "resume_url": "https://example.com/yuki_t_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Lukas Wagner",
@@ -361,7 +373,7 @@ applicants = [
         "previous_occupation": "Data Engineer at GridAnalytics",
         "education": "B.S. Informatics, Technical University of Munich",
         "gender": "Male",
-        "resume_url": "https://example.com/lukas_w_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Thomas Wright",
@@ -375,7 +387,7 @@ applicants = [
         "previous_occupation": "Engine Programmer at GameStudio",
         "education": "B.S. Computer Science, USC",
         "gender": "Male",
-        "resume_url": "https://example.com/thomas_w_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Isabella Rossi",
@@ -389,7 +401,7 @@ applicants = [
         "previous_occupation": "Strategy Analyst at Big4",
         "education": "MBA, INSEAD",
         "gender": "Female",
-        "resume_url": "https://example.com/isabella_r_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "David Kim",
@@ -403,7 +415,7 @@ applicants = [
         "previous_occupation": "Supply Chain Coordinator",
         "education": "B.B.A. Supply Chain Management, York University",
         "gender": "Male",
-        "resume_url": "https://example.com/david_k_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     },
     {
         "name": "Emma Wilson",
@@ -417,7 +429,7 @@ applicants = [
         "previous_occupation": "Mechanical Engineer at AeroDynamics",
         "education": "M.S. Aerospace Engineering, UT Austin",
         "gender": "Female",
-        "resume_url": "https://example.com/emma_w_resume.pdf"
+        "resume_url": "https://ryanchui2.github.io/portfolio/assets/2026_Resume.pdf"
     }
 ]
 
@@ -441,6 +453,23 @@ for job in recruiters:
         gender=job["gender"]
     )
     db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    if recruiter_photo_bytes:
+        photo = Photo(
+            user_id=user.id,
+            url="",
+            order=0,
+            image_data=recruiter_photo_bytes,
+            content_type="image/png"
+        )
+        db.add(photo)
+        db.commit()
+        db.refresh(photo)
+        photo.url = f"http://localhost:8000/api/users/photos/{photo.id}/image"
+        db.commit()
+        
     created_recruiters += 1
 
 created_applicants = 0
@@ -463,8 +492,24 @@ for app in applicants:
         resume_url=app["resume_url"]
     )
     db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    if applicant_photo_bytes:
+        photo = Photo(
+            user_id=user.id,
+            url="",
+            order=0,
+            image_data=applicant_photo_bytes,
+            content_type="image/jpeg"
+        )
+        db.add(photo)
+        db.commit()
+        db.refresh(photo)
+        photo.url = f"http://localhost:8000/api/users/photos/{photo.id}/image"
+        db.commit()
+
     created_applicants += 1
 
-db.commit()
 print(f"Successfully created {created_recruiters} recruiter profiles.")
 print(f"Successfully created {created_applicants} applicant profiles.")
