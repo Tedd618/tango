@@ -163,8 +163,30 @@ export interface SwipeResult {
     created_at: string;
 }
 
-export async function fetchCandidates(userId: number): Promise<UserProfile[]> {
-    const res = await fetch(`${API_BASE}/matches/${userId}/candidates`);
+export interface CandidateFilters {
+    gender?: string;
+    location?: string;
+    nationality?: string;
+    industry?: string;
+    salary_min?: number;
+    salary_max?: number;
+}
+
+export async function fetchCandidates(userId: number, filters?: CandidateFilters): Promise<UserProfile[]> {
+    let url = `${API_BASE}/matches/${userId}/candidates`;
+    if (filters) {
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== "") {
+                params.append(key, String(value));
+            }
+        });
+        const queryString = params.toString();
+        if (queryString) {
+            url += `?${queryString}`;
+        }
+    }
+    const res = await fetch(url);
     if (!res.ok) throw new Error("Failed to fetch candidates");
     return res.json();
 }
