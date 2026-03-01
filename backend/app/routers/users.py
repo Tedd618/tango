@@ -23,15 +23,6 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     
-    # Auto-like logic: when a new RECRUITER is created,
-    # every existing applicant automatically likes them so their inbox is populated.
-    # We do NOT auto-like from applicants → recruiters so applicants can still
-    # browse all recruiters freely in their Discover page.
-    if db_user.role == UserRole.RECRUITER:
-        applicants = db.query(User).filter(User.role == UserRole.APPLICANT).all()
-        for applicant in applicants:
-            db.add(Swipe(swiper_id=applicant.id, target_id=db_user.id, action=SwipeAction.LIKE))
-    
     db.commit()
     return db_user
 
