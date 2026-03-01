@@ -11,10 +11,10 @@ APPLICANT_TEMPLATES = [
     {"type": PromptType.QUESTION, "text": "I'm best at...", "target_role": "applicant"},
     {"type": PromptType.QUESTION, "text": "My dream project is...", "target_role": "applicant"},
     {"type": PromptType.QUESTION, "text": "The work environment I thrive in...", "target_role": "applicant"},
-    {"type": PromptType.QUESTION, "text": "Something I'm proud of building...", "target_role": "applicant"},
-    {"type": PromptType.QUESTION, "text": "I'm looking for a role where...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "My best feats...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "My worst dad joke", "target_role": "applicant"},
     {"type": PromptType.QUESTION, "text": "Outside of work you'll find me...", "target_role": "applicant"},
-    {"type": PromptType.QUESTION, "text": "My superpower is...", "target_role": "applicant"},
+    {"type": PromptType.QUESTION, "text": "Why should I be hired...", "target_role": "applicant"},
     {"type": PromptType.QUESTION, "text": "I learn best by...", "target_role": "applicant"},
 ]
 
@@ -24,7 +24,7 @@ RECRUITER_TEMPLATES = [
     {"type": PromptType.QUESTION, "text": "One project you'll be working on right away is...", "target_role": "recruiter"},
     {"type": PromptType.QUESTION, "text": "The most important quality we are looking for is...", "target_role": "recruiter"},
     {"type": PromptType.QUESTION, "text": "Our team culture can best be described as...", "target_role": "recruiter"},
-    {"type": PromptType.QUESTION, "text": "My best piece of advice for the interview process is...", "target_role": "recruiter"},
+    {"type": PromptType.QUESTION, "text": "You will make coffee for me because...", "target_role": "recruiter"},
 ]
 
 
