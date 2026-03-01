@@ -3,11 +3,27 @@
 import Link from "next/link";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useState, useRef, useEffect } from "react";
+import { fetchCurrentUser, UserProfile } from "@/lib/api";
 
 export default function Header() {
   const { user, isLoading } = useUser();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [dbUser, setDbUser] = useState<UserProfile | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function loadDbUser() {
+      if (user?.email) {
+        try {
+          const profile = await fetchCurrentUser(user.email);
+          setDbUser(profile);
+        } catch (e) {
+          console.error("Failed to load user role", e);
+        }
+      }
+    }
+    loadDbUser();
+  }, [user?.email]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -38,6 +54,15 @@ export default function Header() {
             <div className="size-10 rounded-full bg-gray-200 animate-pulse" />
           ) : user ? (
             <>
+              {/* Role Badge */}
+              {dbUser && (
+                <div className="hidden sm:flex items-center px-3 py-1 bg-gray-100 rounded-full border border-gray-200">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                    {dbUser.role}
+                  </span>
+                </div>
+              )}
+
               {/* User avatar with dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
