@@ -1,3 +1,5 @@
+import random
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -155,7 +157,40 @@ def get_candidates(
     if salary_max is not None:
         query = query.filter(User.salary_max <= salary_max)
 
-    return query.limit(20).all()
+    candidates = query.limit(200).all()
+
+    def score(candidate: User) -> float:
+        points = 0.0
+
+        # Salary overlap (up to 3 pts)
+        if (user.salary_min is not None and user.salary_max is not None and
+                candidate.salary_min is not None and candidate.salary_max is not None):
+            overlap = min(user.salary_max, candidate.salary_max) - max(user.salary_min, candidate.salary_min)
+            if overlap > 0:
+                range_span = max(user.salary_max, candidate.salary_max) - min(user.salary_min, candidate.salary_min)
+                points += 3.0 * (overlap / range_span) if range_span > 0 else 0
+
+        # Industry match (2 pts)
+        if user.industry and candidate.industry and user.industry.lower() == candidate.industry.lower():
+            points += 2.0
+
+        # Profile completeness (up to 2 pts)
+        if candidate.photos:
+            points += 1.0
+        if candidate.prompts:
+            points += 1.0
+
+        # Upset twitch — low-scorers get a wider random ceiling, so weak
+        # candidates occasionally spike above well-matched ones.
+        # Max noise ceiling scales inversely with points:
+        #   points=7 → ceiling ~1.9   (small twitch)
+        #   points=0 → ceiling ~5.0   (big upset possible)
+        max_ceiling = 1.5 + (3.5 / (1.0 + points))
+        noise = random.uniform(0.3, max_ceiling)
+        return points * noise if points > 0 else noise * 0.4
+
+    candidates.sort(key=score, reverse=True)
+    return candidates[:20]
 
 
 @router.get("/{user_id}/inbox", response_model=list[UserWithDetails])
