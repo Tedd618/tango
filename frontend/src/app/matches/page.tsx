@@ -46,7 +46,7 @@ export default async function MatchesPage({
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-background-light text-text-primary-light">
       <Header />
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden pb-[80px]">
         <MatchesClient
           currentUser={user}
           initialMatchedConversations={matchedConversations}

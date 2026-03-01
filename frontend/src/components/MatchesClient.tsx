@@ -65,18 +65,18 @@ export default function MatchesClient({
     };
 
     return (
-        <div className="flex h-full overflow-hidden">
+        <div className="flex h-full overflow-hidden min-h-0">
             {/* Sidebar - hidden on mobile if a chat is selected */}
-            <aside className={`w-full md:w-[400px] flex flex-col border-r border-neutral-200 bg-white z-10 shrink-0 ${selectedMatchId ? "hidden md:flex" : "flex"}`}>
-                <div className="px-6 pt-6 pb-2">
+            <aside className={`w-full md:w-[400px] flex flex-col border-r border-neutral-200 bg-white z-10 shrink-0 ${selectedMatchId ? "hidden md:flex" : "flex"} min-h-0`}>
+                <div className="px-6 pt-6 pb-2 shrink-0">
                     <h3 className="tracking-tight text-3xl font-bold leading-tight mb-4">Matches</h3>
                 </div>
 
-                <div className="h-px bg-neutral-100 w-full mb-2" />
+                <div className="h-px bg-neutral-100 w-full mb-2 shrink-0" />
 
-                {/* Conversations list - pad the bottom for nav bar universally */}
-                <div className="flex-1 overflow-y-auto px-2 pb-[90px]">
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 py-3 flex justify-between items-center">
+                {/* Conversations list */}
+                <div className="flex-1 overflow-y-auto px-2 min-h-0">
+                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 py-3 flex justify-between items-center shrink-0">
                         <span>{conversations.length > 0 ? "Messages" : "No matches yet"}</span>
                     </div>
                     {conversations.map((convo) => {
@@ -130,7 +130,7 @@ export default function MatchesClient({
 
                     {conversations.length === 0 && (
                         <div className="p-8 text-center flex flex-col items-center gap-4">
-                            <div className="size-20 rounded-full bg-gray-50 flex items-center justify-center">
+                            <div className="size-20 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
                                 <span className="material-symbols-outlined text-gray-300 text-4xl">favorite</span>
                             </div>
                             <p className="text-sm font-bold text-gray-400 leading-relaxed">
@@ -142,9 +142,9 @@ export default function MatchesClient({
             </aside>
 
             {/* Chat window space - hidden on mobile if no chat selected */}
-            <main className={`flex-1 flex flex-col bg-white ${!selectedMatchId ? "hidden md:flex" : "flex"}`}>
+            <main className={`flex-1 flex flex-col bg-white min-h-0 ${!selectedMatchId ? "hidden md:flex" : "flex"}`}>
                 {selectedConvo ? (
-                    <div className="flex flex-col h-full bg-white">
+                    <div className="flex flex-col h-full bg-white min-h-0">
                         {/* Mobile Back Button */}
                         <div className="md:hidden px-4 pt-4 shrink-0 bg-white">
                             <button
@@ -155,8 +155,8 @@ export default function MatchesClient({
                                 Back to Matches
                             </button>
                         </div>
-                        {/* Chat content needs its own bottom padding universally for nav bar */}
-                        <div className="flex-1 min-h-0 pb-[85px]">
+                        {/* Chat content bounds tightly using min-h-0 */}
+                        <div className="flex-1 min-h-0">
                             <ChatWindow
                                 matchId={selectedConvo.match.id}
                                 currentUser={currentUser}
@@ -165,12 +165,12 @@ export default function MatchesClient({
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gray-50/50">
-                        <div className="size-24 rounded-full bg-white shadow-sm flex items-center justify-center mb-6">
+                    <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gray-50/50 min-h-0">
+                        <div className="size-24 rounded-full bg-white shadow-sm flex items-center justify-center mb-6 shrink-0">
                             <span className="material-symbols-outlined text-primary text-5xl opacity-40">forum</span>
                         </div>
-                        <h2 className="text-xl font-black text-[#111] mb-2">Select a match to start chatting</h2>
-                        <p className="text-sm font-bold text-gray-400 max-w-xs">
+                        <h2 className="text-xl font-black text-[#111] mb-2 shrink-0">Select a match to start chatting</h2>
+                        <p className="text-sm font-bold text-gray-400 max-w-xs shrink-0">
                             Your conversations will appear here once you select a match from the sidebar.
                         </p>
                     </div>
